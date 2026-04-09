@@ -1,0 +1,1305 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FlyTurismo — Armador de Flyers</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400&family=DM+Sans:wght@300;400;500;600;700&family=Montserrat:wght@400;600;700;800;900&family=Lato:wght@400;700;900&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --bg: #0D1B2A;
+    --panel: #0F2233;
+    --surface: #142840;
+    --border: rgba(255,255,255,0.08);
+    --text: #F0EDE6;
+    --muted: rgba(240,237,230,0.5);
+    --coral: #E8613A;
+    --gold: #C9A84C;
+    --ocean: #1B6CA8;
+    --sky: #4EAECF;
+    --success: #3CB97A;
+    --radius: 10px;
+    --sidebar: 320px;
+  }
+  html, body { height: 100%; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    display: flex; flex-direction: column;
+    overflow: hidden;
+  }
+
+  /* TOP NAV */
+  .topbar {
+    height: 54px;
+    background: rgba(15,34,51,0.98);
+    border-bottom: 1px solid var(--border);
+    display: flex; align-items: center;
+    padding: 0 1.5rem;
+    gap: 1rem;
+    flex-shrink: 0;
+    z-index: 100;
+  }
+  .topbar-logo {
+    font-family: 'Playfair Display', serif;
+    font-weight: 700; font-size: 1.15rem;
+    color: var(--gold);
+    text-decoration: none;
+    margin-right: 0.5rem;
+  }
+  .topbar-logo span { color: var(--coral); }
+  .topbar-sep { width: 1px; height: 20px; background: var(--border); }
+  .topbar-title { font-size: 0.85rem; color: var(--muted); }
+  .topbar-actions { margin-left: auto; display: flex; gap: 0.6rem; align-items: center; }
+  .tb-btn {
+    display: inline-flex; align-items: center; gap: 0.4rem;
+    padding: 0.42rem 0.9rem; border-radius: 7px;
+    font-size: 0.82rem; font-weight: 500;
+    cursor: pointer; border: none; transition: all 0.18s;
+    font-family: 'DM Sans', sans-serif;
+  }
+  .tb-btn.ghost { background: rgba(255,255,255,0.07); color: var(--text); }
+  .tb-btn.ghost:hover { background: rgba(255,255,255,0.13); }
+  .tb-btn.primary { background: var(--coral); color: white; font-weight: 600; }
+  .tb-btn.primary:hover { background: #d4512c; }
+  .tb-btn.success { background: var(--success); color: white; font-weight: 600; }
+  .tb-btn.success:hover { background: #2ea368; }
+
+  /* MAIN LAYOUT */
+  .main {
+    display: flex;
+    flex: 1;
+    overflow: hidden;
+  }
+
+  /* LEFT PANEL */
+  .panel-left {
+    width: var(--sidebar);
+    background: var(--panel);
+    border-right: 1px solid var(--border);
+    display: flex; flex-direction: column;
+    overflow-y: auto;
+    flex-shrink: 0;
+  }
+  .panel-right {
+    width: var(--sidebar);
+    background: var(--panel);
+    border-left: 1px solid var(--border);
+    display: flex; flex-direction: column;
+    overflow-y: auto;
+    flex-shrink: 0;
+  }
+
+  /* TABS */
+  .panel-tabs {
+    display: flex;
+    border-bottom: 1px solid var(--border);
+    flex-shrink: 0;
+  }
+  .ptab {
+    flex: 1; padding: 0.7rem 0.5rem;
+    text-align: center;
+    font-size: 0.78rem; font-weight: 600;
+    cursor: pointer; color: var(--muted);
+    border-bottom: 2px solid transparent;
+    transition: all 0.2s;
+  }
+  .ptab.active { color: var(--coral); border-bottom-color: var(--coral); }
+
+  /* PANEL SECTIONS */
+  .panel-section {
+    padding: 1.2rem;
+    border-bottom: 1px solid var(--border);
+  }
+  .ps-label {
+    font-size: 0.7rem; font-weight: 700;
+    letter-spacing: 0.1em; text-transform: uppercase;
+    color: var(--muted); margin-bottom: 0.8rem;
+    display: flex; align-items: center; gap: 0.4rem;
+  }
+  .ps-label .dot { width: 5px; height: 5px; background: var(--coral); border-radius: 50%; }
+
+  /* FORM ELEMENTS */
+  label { font-size: 0.82rem; color: var(--muted); margin-bottom: 0.3rem; display: block; }
+  input[type="text"], input[type="number"], textarea, select {
+    width: 100%; padding: 0.55rem 0.75rem;
+    background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 7px; color: var(--text);
+    font-family: 'DM Sans', sans-serif; font-size: 0.88rem;
+    transition: border 0.2s;
+    outline: none;
+  }
+  input:focus, textarea:focus, select:focus { border-color: var(--sky); background: rgba(255,255,255,0.08); }
+  textarea { resize: vertical; min-height: 70px; line-height: 1.5; }
+  select option { background: #0F2233; }
+  .form-row { margin-bottom: 0.75rem; }
+  .form-row-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 0.6rem; margin-bottom: 0.75rem; }
+
+  /* TOGGLE CHIPS */
+  .chips { display: flex; flex-wrap: wrap; gap: 0.4rem; }
+  .chip {
+    padding: 0.3rem 0.75rem; border-radius: 100px;
+    font-size: 0.78rem; font-weight: 500;
+    cursor: pointer; border: 1px solid rgba(255,255,255,0.15);
+    background: rgba(255,255,255,0.05);
+    color: var(--muted); transition: all 0.18s;
+    user-select: none;
+  }
+  .chip.active { background: var(--coral); border-color: var(--coral); color: white; }
+
+  /* COLOR PICKERS */
+  .color-row { display: flex; align-items: center; gap: 0.6rem; margin-bottom: 0.6rem; }
+  .color-swatch {
+    width: 32px; height: 32px; border-radius: 8px;
+    border: 2px solid rgba(255,255,255,0.15); cursor: pointer;
+    flex-shrink: 0; overflow: hidden; position: relative;
+  }
+  .color-swatch input[type="color"] {
+    position: absolute; inset: -4px;
+    width: calc(100% + 8px); height: calc(100% + 8px);
+    border: none; padding: 0; cursor: pointer; opacity: 0;
+  }
+  .color-label { font-size: 0.82rem; color: var(--text); flex: 1; }
+  .color-hex { font-size: 0.75rem; color: var(--muted); font-family: monospace; }
+
+  /* TEMPLATE GRID */
+  .template-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.6rem; }
+  .tpl-card {
+    border-radius: 8px; overflow: hidden; cursor: pointer;
+    border: 2px solid transparent; transition: all 0.2s;
+    aspect-ratio: 1;
+    position: relative;
+  }
+  .tpl-card:hover { transform: scale(1.03); }
+  .tpl-card.selected { border-color: var(--coral); }
+  .tpl-card-inner { width: 100%; height: 100%; display: flex; flex-direction: column; justify-content: flex-end; padding: 8px; position: relative; }
+  .tpl-name { font-size: 0.65rem; font-weight: 700; color: white; position: relative; z-index: 1; text-shadow: 0 1px 4px rgba(0,0,0,0.5); }
+  .tpl-overlay { position: absolute; inset: 0; background: linear-gradient(to bottom, transparent 40%, rgba(0,0,0,0.65)); }
+
+  /* FORMAT GRID */
+  .format-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.5rem; }
+  .fmt-card {
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 8px; padding: 0.6rem 0.4rem;
+    text-align: center; cursor: pointer;
+    transition: all 0.2s; background: rgba(255,255,255,0.04);
+  }
+  .fmt-card:hover { background: rgba(255,255,255,0.08); }
+  .fmt-card.active { border-color: var(--coral); background: rgba(232,97,58,0.1); }
+  .fmt-icon { font-size: 1.2rem; margin-bottom: 0.2rem; }
+  .fmt-name { font-size: 0.65rem; font-weight: 600; color: var(--text); }
+  .fmt-size { font-size: 0.58rem; color: var(--muted); }
+
+  /* CANVAS AREA */
+  .canvas-area {
+    flex: 1;
+    background: #080F18;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: flex-start;
+    overflow: auto;
+    padding: 2rem;
+    gap: 1.5rem;
+    position: relative;
+  }
+  .canvas-area::before {
+    content: ''; position: absolute; inset: 0;
+    background-image: radial-gradient(rgba(255,255,255,0.03) 1px, transparent 1px);
+    background-size: 24px 24px;
+    pointer-events: none;
+  }
+
+  .canvas-label {
+    font-size: 0.72rem; font-weight: 600;
+    color: var(--muted); letter-spacing: 0.08em;
+    text-transform: uppercase;
+    align-self: flex-start;
+  }
+
+  .canvas-wrap {
+    position: relative;
+    flex-shrink: 0;
+  }
+  .canvas-shadow {
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 20px 80px rgba(0,0,0,0.7), 0 4px 20px rgba(0,0,0,0.4);
+  }
+
+  /* THE FLYER ITSELF */
+  #flyer-canvas {
+    position: relative;
+    overflow: hidden;
+    font-family: 'Montserrat', sans-serif;
+    display: flex; flex-direction: column;
+    justify-content: flex-end;
+  }
+
+  .flyer-bg-layer {
+    position: absolute; inset: 0;
+  }
+  .flyer-bg-pattern {
+    position: absolute; inset: 0; opacity: 0.07;
+  }
+  .flyer-gradient {
+    position: absolute; inset: 0;
+  }
+  .flyer-content {
+    position: relative; z-index: 2;
+    padding: 24px;
+    display: flex; flex-direction: column;
+    height: 100%;
+  }
+
+  /* Flyer header (logo area) */
+  .f-header {
+    display: flex; justify-content: space-between; align-items: flex-start;
+    margin-bottom: auto;
+  }
+  .f-logo-area {
+    background: rgba(255,255,255,0.15);
+    backdrop-filter: blur(8px);
+    border-radius: 8px; padding: 6px 12px;
+    display: flex; align-items: center; gap: 6px;
+    max-width: 140px;
+  }
+  .f-logo-img { max-height: 28px; max-width: 100px; object-fit: contain; border-radius: 4px; }
+  .f-logo-text { font-size: 0.7rem; font-weight: 700; color: white; line-height: 1.2; }
+  .f-badge {
+    padding: 4px 10px; border-radius: 100px;
+    font-size: 0.62rem; font-weight: 700;
+    text-transform: uppercase; letter-spacing: 0.06em;
+  }
+
+  /* Flyer body */
+  .f-body { display: flex; flex-direction: column; gap: 6px; }
+  .f-includes {
+    display: flex; flex-wrap: wrap; gap: 5px;
+    margin-bottom: 4px;
+  }
+  .f-inc-chip {
+    background: rgba(255,255,255,0.18);
+    backdrop-filter: blur(4px);
+    padding: 3px 8px; border-radius: 100px;
+    font-size: 0.58rem; font-weight: 600; color: white;
+  }
+  .f-destination {
+    font-size: 2.2rem; font-weight: 900; line-height: 1.05;
+    color: white; text-shadow: 0 2px 12px rgba(0,0,0,0.3);
+  }
+  .f-subtitle {
+    font-size: 0.78rem; font-weight: 600; opacity: 0.85;
+    color: white; letter-spacing: 0.03em;
+  }
+  .f-divider { height: 1px; background: rgba(255,255,255,0.2); margin: 6px 0; }
+  .f-price-row { display: flex; align-items: flex-end; gap: 10px; justify-content: space-between; }
+  .f-price-block { }
+  .f-price-from { font-size: 0.6rem; font-weight: 500; opacity: 0.7; color: white; letter-spacing: 0.05em; text-transform: uppercase; }
+  .f-price-amount { font-size: 1.8rem; font-weight: 900; color: white; line-height: 1.1; }
+  .f-price-pp { font-size: 0.62rem; opacity: 0.7; color: white; }
+  .f-contact-block { text-align: right; }
+  .f-contact-line { font-size: 0.6rem; color: rgba(255,255,255,0.75); }
+  .f-nights-badge {
+    display: inline-flex; flex-direction: column; align-items: center; justify-content: center;
+    padding: 6px 10px; border-radius: 8px;
+    background: rgba(0,0,0,0.25);
+    backdrop-filter: blur(6px);
+    margin-bottom: 2px;
+  }
+  .f-nights-num { font-size: 1.4rem; font-weight: 900; color: white; line-height: 1; }
+  .f-nights-label { font-size: 0.5rem; font-weight: 700; color: rgba(255,255,255,0.75); text-transform: uppercase; letter-spacing: 0.08em; }
+
+  /* story layout adjustments */
+  #flyer-canvas.layout-story .f-destination { font-size: 2.8rem; }
+  #flyer-canvas.layout-story .f-price-amount { font-size: 2.2rem; }
+
+  /* LOGO UPLOAD */
+  .upload-area {
+    border: 2px dashed rgba(255,255,255,0.15);
+    border-radius: 8px; padding: 1rem;
+    text-align: center; cursor: pointer;
+    transition: all 0.2s;
+    position: relative;
+  }
+  .upload-area:hover { border-color: var(--coral); background: rgba(232,97,58,0.05); }
+  .upload-area input { position: absolute; inset: 0; opacity: 0; cursor: pointer; }
+  .upload-icon { font-size: 1.5rem; margin-bottom: 0.3rem; }
+  .upload-text { font-size: 0.78rem; color: var(--muted); }
+  .logo-preview { max-height: 50px; max-width: 100%; border-radius: 6px; margin: 0.4rem auto; display: block; }
+
+  /* LOADING OVERLAY */
+  .export-overlay {
+    display: none;
+    position: fixed; inset: 0; z-index: 9999;
+    background: rgba(8,15,24,0.9);
+    align-items: center; justify-content: center;
+    flex-direction: column; gap: 1rem;
+  }
+  .export-overlay.show { display: flex; }
+  .export-spinner {
+    width: 48px; height: 48px;
+    border: 3px solid rgba(255,255,255,0.1);
+    border-top-color: var(--coral);
+    border-radius: 50%; animation: spin 0.8s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* TOAST */
+  .toast {
+    position: fixed; bottom: 2rem; left: 50%; transform: translateX(-50%) translateY(4rem);
+    background: var(--success); color: white;
+    padding: 0.7rem 1.5rem; border-radius: 8px;
+    font-weight: 600; font-size: 0.88rem;
+    z-index: 9998; transition: transform 0.3s;
+    pointer-events: none;
+  }
+  .toast.show { transform: translateX(-50%) translateY(0); }
+
+  /* SCROLLBAR */
+  ::-webkit-scrollbar { width: 5px; height: 5px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 3px; }
+  ::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.2); }
+
+  /* RANGE */
+  input[type="range"] {
+    -webkit-appearance: none; width: 100%; height: 4px;
+    background: rgba(255,255,255,0.1); border-radius: 2px;
+    outline: none; border: none; padding: 0;
+  }
+  input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none; width: 14px; height: 14px;
+    background: var(--coral); border-radius: 50%; cursor: pointer;
+  }
+
+  /* PANEL CONTENT SWITCHER */
+  .tab-content { display: none; }
+  .tab-content.active { display: block; }
+
+  /* INCLUDES TAGS */
+  .inc-input-row { display: flex; gap: 0.4rem; margin-bottom: 0.5rem; }
+  .inc-input-row input { flex: 1; }
+  .inc-add-btn {
+    background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.15);
+    color: var(--text); border-radius: 7px; padding: 0 0.7rem;
+    cursor: pointer; font-size: 1rem; transition: all 0.2s;
+    font-family: 'DM Sans', sans-serif;
+  }
+  .inc-add-btn:hover { background: var(--coral); border-color: var(--coral); }
+  .inc-tags { display: flex; flex-wrap: wrap; gap: 0.35rem; }
+  .inc-tag {
+    background: rgba(78,174,207,0.15); border: 1px solid rgba(78,174,207,0.3);
+    color: var(--sky); padding: 0.25rem 0.5rem;
+    border-radius: 100px; font-size: 0.72rem; display: flex; align-items: center; gap: 0.3rem;
+  }
+  .inc-tag .rm { cursor: pointer; opacity: 0.6; font-size: 0.7rem; line-height: 1; }
+  .inc-tag .rm:hover { opacity: 1; }
+
+  /* export panel */
+  .export-formats { display: flex; flex-direction: column; gap: 0.5rem; }
+  .exp-item {
+    display: flex; align-items: center; justify-content: space-between;
+    background: rgba(255,255,255,0.04); border: 1px solid var(--border);
+    border-radius: 8px; padding: 0.6rem 0.8rem;
+  }
+  .exp-name { font-size: 0.85rem; font-weight: 600; }
+  .exp-dim { font-size: 0.72rem; color: var(--muted); }
+  .exp-dl {
+    background: var(--coral); color: white; border: none;
+    padding: 0.3rem 0.75rem; border-radius: 6px;
+    font-size: 0.75rem; font-weight: 600; cursor: pointer;
+    font-family: 'DM Sans', sans-serif; transition: all 0.2s;
+  }
+  .exp-dl:hover { background: #cf4f2a; }
+
+  /* Right panel tabs */
+  .right-tab-content { display: none; }
+  .right-tab-content.active { display: block; }
+
+  @media (max-width: 1100px) {
+    .panel-right { display: none; }
+  }
+  @media (max-width: 780px) {
+    .panel-left { width: 260px; }
+    :root { --sidebar: 260px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- TOP BAR -->
+<div class="topbar">
+  <a href="index.html" class="topbar-logo">Fly<span>Turismo</span></a>
+  <div class="topbar-sep"></div>
+  <span class="topbar-title">Armador de Flyers</span>
+  <div class="topbar-actions">
+    <button class="tb-btn ghost" onclick="resetForm()">↺ Limpiar</button>
+    <button class="tb-btn ghost" onclick="saveBrand()">💾 Guardar marca</button>
+    <button class="tb-btn primary" onclick="showExportPanel()">⬇ Exportar</button>
+  </div>
+</div>
+
+<div class="main">
+
+<!-- ===== LEFT PANEL ===== -->
+<div class="panel-left">
+  <div class="panel-tabs">
+    <div class="ptab active" onclick="switchTab('datos')">📋 Datos</div>
+    <div class="ptab" onclick="switchTab('estilo')">🎨 Estilo</div>
+    <div class="ptab" onclick="switchTab('marca')">🏷 Marca</div>
+  </div>
+
+  <!-- TAB: DATOS -->
+  <div class="tab-content active" id="tab-datos">
+    <div class="panel-section">
+      <div class="ps-label"><span class="dot"></span>Destino</div>
+      <div class="form-row">
+        <label>Destino principal</label>
+        <input type="text" id="inp-destino" placeholder="ej: Cancún, México" oninput="updateFlyer()">
+      </div>
+      <div class="form-row">
+        <label>Subtítulo / descripción corta</label>
+        <input type="text" id="inp-subtitulo" placeholder="ej: Todo Incluido · 7 noches" oninput="updateFlyer()">
+      </div>
+    </div>
+
+    <div class="panel-section">
+      <div class="ps-label"><span class="dot"></span>Precio</div>
+      <div class="form-row-2">
+        <div class="form-row" style="margin:0">
+          <label>Precio desde</label>
+          <input type="text" id="inp-precio" placeholder="ej: USD 850" oninput="updateFlyer()">
+        </div>
+        <div class="form-row" style="margin:0">
+          <label>Por persona</label>
+          <input type="text" id="inp-pp" placeholder="ej: por persona" oninput="updateFlyer()">
+        </div>
+      </div>
+      <div class="form-row-2">
+        <div class="form-row" style="margin:0">
+          <label>Noches</label>
+          <input type="number" id="inp-noches" placeholder="7" min="1" max="90" oninput="updateFlyer()">
+        </div>
+        <div class="form-row" style="margin:0">
+          <label>Badge</label>
+          <input type="text" id="inp-badge" placeholder="OFERTA" oninput="updateFlyer()">
+        </div>
+      </div>
+    </div>
+
+    <div class="panel-section">
+      <div class="ps-label"><span class="dot"></span>Qué incluye</div>
+      <div class="inc-input-row">
+        <input type="text" id="inp-inc" placeholder="ej: Vuelo, Hotel 5★..." onkeydown="if(event.key==='Enter')addIncluye()">
+        <button class="inc-add-btn" onclick="addIncluye()">+</button>
+      </div>
+      <div class="inc-tags" id="inc-tags"></div>
+      <div style="margin-top:0.5rem">
+        <label style="margin-bottom:0.3rem;display:block">Agregar rápido:</label>
+        <div class="chips" id="quick-includes"></div>
+      </div>
+    </div>
+
+    <div class="panel-section">
+      <div class="ps-label"><span class="dot"></span>Contacto en flyer</div>
+      <div class="form-row">
+        <label>Teléfono / WhatsApp</label>
+        <input type="text" id="inp-tel" placeholder="ej: +54 9 11 1234-5678" oninput="updateFlyer()">
+      </div>
+      <div class="form-row">
+        <label>Email o web</label>
+        <input type="text" id="inp-email" placeholder="ej: info@miagencia.com" oninput="updateFlyer()">
+      </div>
+    </div>
+  </div>
+
+  <!-- TAB: ESTILO -->
+  <div class="tab-content" id="tab-estilo">
+    <div class="panel-section">
+      <div class="ps-label"><span class="dot"></span>Plantilla</div>
+      <div class="template-grid" id="template-grid"></div>
+    </div>
+
+    <div class="panel-section">
+      <div class="ps-label"><span class="dot"></span>Formato / Canal</div>
+      <div class="format-grid" id="format-grid"></div>
+    </div>
+
+    <div class="panel-section">
+      <div class="ps-label"><span class="dot"></span>Color de acento</div>
+      <div class="color-row">
+        <div class="color-swatch" id="swatch-accent" style="background:#E8613A">
+          <input type="color" id="cp-accent" value="#E8613A" oninput="updateAccentColor(this.value)">
+        </div>
+        <span class="color-label">Color principal</span>
+        <span class="color-hex" id="hex-accent">#E8613A</span>
+      </div>
+      <div class="color-row">
+        <div class="color-swatch" id="swatch-badge" style="background:#C9A84C">
+          <input type="color" id="cp-badge" value="#C9A84C" oninput="updateBadgeColor(this.value)">
+        </div>
+        <span class="color-label">Color badge</span>
+        <span class="color-hex" id="hex-badge">#C9A84C</span>
+      </div>
+    </div>
+
+    <div class="panel-section">
+      <div class="ps-label"><span class="dot"></span>Opacidad del gradiente</div>
+      <input type="range" id="grad-opacity" min="30" max="90" value="65" oninput="updateFlyer()">
+      <div style="display:flex;justify-content:space-between;font-size:0.7rem;color:var(--muted);margin-top:0.3rem">
+        <span>Más claro</span><span>Más oscuro</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- TAB: MARCA -->
+  <div class="tab-content" id="tab-marca">
+    <div class="panel-section">
+      <div class="ps-label"><span class="dot"></span>Logo de tu agencia</div>
+      <div class="upload-area" id="logo-upload-area">
+        <input type="file" accept="image/*" id="logo-input" onchange="handleLogoUpload(event)">
+        <div class="upload-icon">🖼️</div>
+        <div class="upload-text">Arrastrá o hacé clic para subir<br><small>PNG, JPG, SVG · máx. 2MB</small></div>
+      </div>
+      <img class="logo-preview" id="logo-preview" style="display:none">
+      <button class="tb-btn ghost" style="width:100%;margin-top:0.5rem;display:none" id="logo-remove" onclick="removeLogo()">✕ Quitar logo</button>
+    </div>
+
+    <div class="panel-section">
+      <div class="ps-label"><span class="dot"></span>Nombre de tu agencia</div>
+      <div class="form-row">
+        <label>Nombre (si no tenés logo)</label>
+        <input type="text" id="inp-agencia" placeholder="ej: Viajes del Sur" oninput="updateFlyer()">
+      </div>
+      <div class="form-row">
+        <label>Slogan / tagline</label>
+        <input type="text" id="inp-slogan" placeholder="ej: Tu próximo destino te espera" oninput="updateFlyer()">
+      </div>
+    </div>
+
+    <div class="panel-section">
+      <div class="ps-label"><span class="dot"></span>Paleta de marca</div>
+      <div class="color-row">
+        <div class="color-swatch" id="swatch-brand1" style="background:#0B4F6C">
+          <input type="color" id="cp-brand1" value="#0B4F6C" oninput="updateBrandColor1(this.value)">
+        </div>
+        <span class="color-label">Color primario</span>
+        <span class="color-hex" id="hex-brand1">#0B4F6C</span>
+      </div>
+      <div class="color-row">
+        <div class="color-swatch" id="swatch-brand2" style="background:#E8613A">
+          <input type="color" id="cp-brand2" value="#E8613A" oninput="updateBrandColor2(this.value)">
+        </div>
+        <span class="color-label">Color secundario</span>
+        <span class="color-hex" id="hex-brand2">#E8613A</span>
+      </div>
+    </div>
+
+    <div class="panel-section">
+      <div class="ps-label"><span class="dot"></span>Datos guardados</div>
+      <p style="font-size:0.78rem;color:var(--muted);line-height:1.6">
+        Presioná <strong style="color:var(--text)">Guardar marca</strong> arriba para recordar tu logo, colores y contacto automáticamente en cada sesión.
+      </p>
+    </div>
+  </div>
+</div><!-- end panel-left -->
+
+<!-- ===== CANVAS AREA ===== -->
+<div class="canvas-area">
+  <div class="canvas-label" id="canvas-label">Vista previa · Instagram Feed (1080×1080)</div>
+  <div class="canvas-wrap">
+    <div class="canvas-shadow">
+      <!-- THE FLYER -->
+      <div id="flyer-canvas">
+        <!-- bg layers -->
+        <div class="flyer-bg-layer" id="flyer-bg-layer"></div>
+        <div class="flyer-gradient" id="flyer-gradient"></div>
+        <!-- content -->
+        <div class="flyer-content" id="flyer-content">
+          <div class="f-header">
+            <div class="f-logo-area" id="f-logo-area">
+              <img class="f-logo-img" id="f-logo-img" style="display:none">
+              <div class="f-logo-text" id="f-logo-text">Mi Agencia</div>
+            </div>
+            <div class="f-badge" id="f-badge">OFERTA</div>
+          </div>
+          <div class="f-body" style="margin-top:auto">
+            <div class="f-includes" id="f-includes"></div>
+            <div style="display:flex;align-items:flex-end;gap:10px">
+              <div>
+                <div class="f-destination" id="f-destination">Destino</div>
+                <div class="f-subtitle" id="f-subtitle">Completá los datos</div>
+              </div>
+              <div class="f-nights-badge" id="f-nights-badge" style="display:none;margin-left:auto;flex-shrink:0">
+                <div class="f-nights-num" id="f-nights-num">7</div>
+                <div class="f-nights-label">noches</div>
+              </div>
+            </div>
+            <div class="f-divider"></div>
+            <div class="f-price-row">
+              <div class="f-price-block">
+                <div class="f-price-from">DESDE</div>
+                <div class="f-price-amount" id="f-price">—</div>
+                <div class="f-price-pp" id="f-pp">por persona</div>
+              </div>
+              <div class="f-contact-block">
+                <div class="f-contact-line" id="f-tel"></div>
+                <div class="f-contact-line" id="f-email"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== RIGHT PANEL (EXPORT) ===== -->
+<div class="panel-right" id="right-panel">
+  <div class="panel-tabs">
+    <div class="ptab active" onclick="switchRightTab('export')">⬇ Exportar</div>
+    <div class="ptab" onclick="switchRightTab('canales')">📱 Canales</div>
+  </div>
+
+  <!-- EXPORT TAB -->
+  <div class="right-tab-content active" id="rtab-export">
+    <div class="panel-section">
+      <div class="ps-label"><span class="dot"></span>Formato de archivo</div>
+      <div class="chips" style="margin-bottom:0.8rem">
+        <div class="chip active" onclick="setFileFormat('png',this)">PNG</div>
+        <div class="chip" onclick="setFileFormat('jpeg',this)">JPEG</div>
+      </div>
+      <div class="form-row">
+        <label>Escala / calidad (para redes: 2×)</label>
+        <input type="range" id="exp-scale" min="1" max="3" value="2" step="0.5">
+        <div style="display:flex;justify-content:space-between;font-size:0.7rem;color:var(--muted);margin-top:0.3rem">
+          <span>1× normal</span><span id="scale-label">2× redes</span><span>3× alta</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="panel-section">
+      <div class="ps-label"><span class="dot"></span>Exportar por canal</div>
+      <div class="export-formats" id="export-formats"></div>
+    </div>
+
+    <div class="panel-section">
+      <div class="ps-label"><span class="dot"></span>Exportar actual</div>
+      <button class="tb-btn primary" style="width:100%;padding:0.75rem;font-size:0.9rem" onclick="exportCurrent()">
+        ⬇ Descargar vista actual
+      </button>
+      <p style="font-size:0.72rem;color:var(--muted);margin-top:0.5rem;line-height:1.5">
+        Descarga el flyer exactamente como lo ves en la vista previa.
+      </p>
+    </div>
+  </div>
+
+  <!-- CANALES TAB -->
+  <div class="right-tab-content" id="rtab-canales">
+    <div class="panel-section">
+      <div class="ps-label"><span class="dot"></span>Guía de tamaños</div>
+      <div style="display:flex;flex-direction:column;gap:0.6rem;">
+        <div style="background:rgba(255,255,255,0.04);border-radius:8px;padding:0.8rem;">
+          <div style="font-weight:600;font-size:0.82rem;margin-bottom:0.3rem">📸 Instagram</div>
+          <div style="font-size:0.75rem;color:var(--muted);line-height:1.8">
+            Feed: 1080×1080 (1:1)<br>
+            Historia: 1080×1920 (9:16)<br>
+            Reels: 1080×1920 (9:16)
+          </div>
+        </div>
+        <div style="background:rgba(255,255,255,0.04);border-radius:8px;padding:0.8rem;">
+          <div style="font-weight:600;font-size:0.82rem;margin-bottom:0.3rem">📘 Facebook</div>
+          <div style="font-size:0.75rem;color:var(--muted);line-height:1.8">
+            Post: 1200×630 (~2:1)<br>
+            Historia: 1080×1920 (9:16)
+          </div>
+        </div>
+        <div style="background:rgba(255,255,255,0.04);border-radius:8px;padding:0.8rem;">
+          <div style="font-weight:600;font-size:0.82rem;margin-bottom:0.3rem">💼 LinkedIn</div>
+          <div style="font-size:0.75rem;color:var(--muted);line-height:1.8">
+            Post: 1200×627 (~2:1)<br>
+            Banner: 1584×396
+          </div>
+        </div>
+        <div style="background:rgba(255,255,255,0.04);border-radius:8px;padding:0.8rem;">
+          <div style="font-weight:600;font-size:0.82rem;margin-bottom:0.3rem">💬 WhatsApp</div>
+          <div style="font-size:0.75rem;color:var(--muted);line-height:1.8">
+            Estado: 1080×1920 (9:16)<br>
+            Chat: cualquier formato<br>
+            Recomendado: JPEG para compresión
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div><!-- end panel-right -->
+
+</div><!-- end main -->
+
+<!-- EXPORT OVERLAY -->
+<div class="export-overlay" id="export-overlay">
+  <div class="export-spinner"></div>
+  <div style="color:var(--text);font-size:0.9rem">Generando flyer...</div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast">✅ ¡Flyer descargado!</div>
+
+<script>
+// ============================================================
+// STATE
+// ============================================================
+const state = {
+  template: 'oceano',
+  format: 'ig-feed',
+  fileFormat: 'png',
+  scale: 2,
+  accentColor: '#E8613A',
+  badgeColor: '#C9A84C',
+  brand1: '#0B4F6C',
+  brand2: '#E8613A',
+  logoDataURL: null,
+  includes: [],
+  gradOpacity: 65
+};
+
+// ============================================================
+// TEMPLATES
+// ============================================================
+const templates = [
+  {
+    id: 'oceano',
+    name: 'Océano',
+    emoji: '🌊',
+    bg: 'linear-gradient(135deg, #062D5E 0%, #0B6FA0 50%, #1AA4C8 100%)',
+    pattern: `<svg width="200" height="200" xmlns="http://www.w3.org/2000/svg"><path d="M0 100 Q50 80 100 100 Q150 120 200 100" stroke="white" stroke-width="2" fill="none"/><path d="M0 120 Q50 100 100 120 Q150 140 200 120" stroke="white" stroke-width="1.5" fill="none"/><path d="M0 140 Q50 120 100 140 Q150 160 200 140" stroke="white" stroke-width="1" fill="none"/></svg>`,
+  },
+  {
+    id: 'atardecer',
+    name: 'Atardecer',
+    emoji: '🌅',
+    bg: 'linear-gradient(160deg, #1A0533 0%, #7B1E5C 40%, #E8613A 75%, #F5C842 100%)',
+    pattern: `<svg width="200" height="200" xmlns="http://www.w3.org/2000/svg"><circle cx="100" cy="180" r="80" stroke="white" stroke-width="1.5" fill="none" stroke-dasharray="4,4"/><circle cx="100" cy="180" r="60" stroke="white" stroke-width="1" fill="none" stroke-dasharray="3,6"/></svg>`,
+  },
+  {
+    id: 'bosque',
+    name: 'Aventura',
+    emoji: '🏔️',
+    bg: 'linear-gradient(160deg, #0C2C1E 0%, #1A5C30 50%, #4CAF6A 100%)',
+    pattern: `<svg width="200" height="200" xmlns="http://www.w3.org/2000/svg"><polygon points="100,20 40,120 160,120" stroke="white" stroke-width="1.5" fill="none"/><polygon points="100,60 55,130 145,130" stroke="white" stroke-width="1" fill="none"/></svg>`,
+  },
+  {
+    id: 'ciudad',
+    name: 'Ciudad',
+    emoji: '🏙️',
+    bg: 'linear-gradient(170deg, #0D0D1A 0%, #1A1A3E 50%, #2D3074 100%)',
+    pattern: `<svg width="200" height="200" xmlns="http://www.w3.org/2000/svg"><rect x="20" y="80" width="20" height="100" stroke="white" stroke-width="1" fill="none"/><rect x="50" y="60" width="15" height="120" stroke="white" stroke-width="1" fill="none"/><rect x="75" y="90" width="25" height="90" stroke="white" stroke-width="1" fill="none"/><rect x="120" y="50" width="18" height="130" stroke="white" stroke-width="1" fill="none"/><rect x="150" y="75" width="22" height="105" stroke="white" stroke-width="1" fill="none"/></svg>`,
+  },
+  {
+    id: 'dorado',
+    name: 'Lujo',
+    emoji: '✨',
+    bg: 'linear-gradient(135deg, #1A0E00 0%, #3D2700 40%, #8B6914 75%, #C9A84C 100%)',
+    pattern: `<svg width="200" height="200" xmlns="http://www.w3.org/2000/svg"><line x1="0" y1="0" x2="200" y2="200" stroke="white" stroke-width="0.8"/><line x1="200" y1="0" x2="0" y2="200" stroke="white" stroke-width="0.8"/><rect x="60" y="60" width="80" height="80" stroke="white" stroke-width="1" fill="none" transform="rotate(45,100,100)"/></svg>`,
+  },
+  {
+    id: 'arena',
+    name: 'Playa',
+    emoji: '🏖️',
+    bg: 'linear-gradient(160deg, #1B4E7A 0%, #2E86C1 35%, #5BC0DE 60%, #F5CBA7 85%, #F0B27A 100%)',
+    pattern: `<svg width="200" height="200" xmlns="http://www.w3.org/2000/svg"><ellipse cx="100" cy="100" rx="90" ry="30" stroke="white" stroke-width="1" fill="none"/><ellipse cx="100" cy="100" rx="70" ry="20" stroke="white" stroke-width="0.8" fill="none"/></svg>`,
+  },
+];
+
+// ============================================================
+// FORMATS
+// ============================================================
+const formats = [
+  { id: 'ig-feed',    name: 'IG Feed',    icon: '📸', w: 540, h: 540,  displayW: 1080, displayH: 1080,  desc: '1080×1080' },
+  { id: 'ig-story',   name: 'IG Story',   icon: '📱', w: 304, h: 540,  displayW: 1080, displayH: 1920,  desc: '1080×1920' },
+  { id: 'fb-post',    name: 'FB Post',    icon: '📘', w: 540, h: 283,  displayW: 1200, displayH: 630,   desc: '1200×630' },
+  { id: 'linkedin',   name: 'LinkedIn',   icon: '💼', w: 540, h: 283,  displayW: 1200, displayH: 627,   desc: '1200×627' },
+  { id: 'whatsapp',   name: 'WhatsApp',   icon: '💬', w: 304, h: 540,  displayW: 1080, displayH: 1920,  desc: '1080×1920' },
+  { id: 'horizontal', name: 'Horizontal', icon: '🖥️', w: 540, h: 203,  displayW: 1920, displayH: 720,   desc: '1920×720' },
+];
+
+// ============================================================
+// QUICK INCLUDES
+// ============================================================
+const quickIncludes = [
+  '✈️ Vuelo', '🏨 Hotel', '🍽️ Desayuno', '🍽️ Media pensión', '🍽️ Todo incluido',
+  '🚌 Traslados', '🗺️ Excursiones', '🔒 Seguro', '🏊 Piscina', '💆 Spa',
+  '⛵ Crucero', '🚂 Tren', '🚗 Auto', '📡 WiFi', '🎭 Espectáculos'
+];
+
+// ============================================================
+// INIT
+// ============================================================
+function init() {
+  buildTemplateGrid();
+  buildFormatGrid();
+  buildQuickIncludes();
+  buildExportFormats();
+  loadBrand();
+  updateFlyer();
+}
+
+function buildTemplateGrid() {
+  const g = document.getElementById('template-grid');
+  g.innerHTML = templates.map(t => `
+    <div class="tpl-card ${t.id===state.template?'selected':''}" onclick="selectTemplate('${t.id}')">
+      <div class="tpl-card-inner" style="background:${t.bg}">
+        <div class="tpl-overlay"></div>
+        <div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-60%);font-size:1.8rem">${t.emoji}</div>
+        <div class="tpl-name">${t.name}</div>
+      </div>
+    </div>
+  `).join('');
+}
+
+function buildFormatGrid() {
+  const g = document.getElementById('format-grid');
+  g.innerHTML = formats.map(f => `
+    <div class="fmt-card ${f.id===state.format?'active':''}" onclick="selectFormat('${f.id}')">
+      <div class="fmt-icon">${f.icon}</div>
+      <div class="fmt-name">${f.name}</div>
+      <div class="fmt-size">${f.desc}</div>
+    </div>
+  `).join('');
+}
+
+function buildQuickIncludes() {
+  const c = document.getElementById('quick-includes');
+  c.innerHTML = quickIncludes.map(i => `
+    <div class="chip" onclick="addQuickInclude('${i}')">${i}</div>
+  `).join('');
+}
+
+function buildExportFormats() {
+  const c = document.getElementById('export-formats');
+  c.innerHTML = formats.map(f => `
+    <div class="exp-item">
+      <div>
+        <div class="exp-name">${f.icon} ${f.name}</div>
+        <div class="exp-dim">${f.desc}</div>
+      </div>
+      <button class="exp-dl" onclick="exportFormat('${f.id}')">⬇ DL</button>
+    </div>
+  `).join('');
+}
+
+// ============================================================
+// SELECT TEMPLATE / FORMAT
+// ============================================================
+function selectTemplate(id) {
+  state.template = id;
+  buildTemplateGrid();
+  updateFlyer();
+}
+
+function selectFormat(id) {
+  state.format = id;
+  buildFormatGrid();
+  updateFlyer();
+}
+
+// ============================================================
+// UPDATE FLYER
+// ============================================================
+function updateFlyer() {
+  const tpl = templates.find(t => t.id === state.template);
+  const fmt = formats.find(f => f.id === state.format);
+  if (!tpl || !fmt) return;
+
+  const canvas = document.getElementById('flyer-canvas');
+  const opacity = document.getElementById('grad-opacity')?.value || 65;
+
+  // Size
+  canvas.style.width = fmt.w + 'px';
+  canvas.style.height = fmt.h + 'px';
+
+  // Layout class
+  canvas.classList.remove('layout-story','layout-feed','layout-wide');
+  if (fmt.h > fmt.w * 1.3) canvas.classList.add('layout-story');
+  else if (fmt.w > fmt.h * 1.3) canvas.classList.add('layout-wide');
+  else canvas.classList.add('layout-feed');
+
+  // BG
+  const bgLayer = document.getElementById('flyer-bg-layer');
+  bgLayer.style.background = tpl.bg;
+
+  // Pattern SVG
+  let patternSvg = tpl.pattern || '';
+  bgLayer.innerHTML = patternSvg ? `<div style="position:absolute;inset:0;opacity:0.08;background-image:url('data:image/svg+xml;base64,${btoa(patternSvg)}');background-size:200px 200px"></div>` : '';
+
+  // Gradient overlay
+  const grad = document.getElementById('flyer-gradient');
+  const op = parseInt(opacity) / 100;
+  grad.style.background = `linear-gradient(to top, rgba(0,0,0,${op}) 0%, rgba(0,0,0,${op*0.4}) 50%, rgba(0,0,0,0.05) 100%)`;
+
+  // Logo area
+  const logoImg = document.getElementById('f-logo-img');
+  const logoText = document.getElementById('f-logo-text');
+  const agencia = document.getElementById('inp-agencia')?.value || '';
+
+  if (state.logoDataURL) {
+    logoImg.src = state.logoDataURL;
+    logoImg.style.display = 'block';
+    logoText.style.display = 'none';
+  } else {
+    logoImg.style.display = 'none';
+    logoText.textContent = agencia || 'Mi Agencia';
+    logoText.style.display = 'block';
+  }
+
+  // Badge
+  const badge = document.getElementById('f-badge');
+  const badgeVal = document.getElementById('inp-badge')?.value || '';
+  badge.textContent = badgeVal || '';
+  badge.style.display = badgeVal ? 'inline-flex' : 'none';
+  badge.style.background = state.badgeColor;
+  badge.style.color = 'white';
+
+  // Destination
+  const dest = document.getElementById('inp-destino')?.value || '';
+  document.getElementById('f-destination').textContent = dest || 'Tu Destino';
+  document.getElementById('f-destination').style.fontSize =
+    dest.length > 20 ? (fmt.h > fmt.w*1.3 ? '2rem' : '1.4rem') :
+    dest.length > 12 ? (fmt.h > fmt.w*1.3 ? '2.5rem' : '1.8rem') :
+    (fmt.h > fmt.w*1.3 ? '2.8rem' : '2.2rem');
+
+  // Subtitle
+  const sub = document.getElementById('inp-subtitulo')?.value || '';
+  document.getElementById('f-subtitle').textContent = sub || '';
+
+  // Price
+  const precio = document.getElementById('inp-precio')?.value || '';
+  document.getElementById('f-price').textContent = precio || '—';
+  document.getElementById('f-price').style.color = state.accentColor;
+
+  const pp = document.getElementById('inp-pp')?.value || '';
+  document.getElementById('f-pp').textContent = pp || 'por persona';
+
+  // Nights
+  const noches = document.getElementById('inp-noches')?.value || '';
+  const nightsBadge = document.getElementById('f-nights-badge');
+  if (noches) {
+    document.getElementById('f-nights-num').textContent = noches;
+    nightsBadge.style.display = 'flex';
+  } else {
+    nightsBadge.style.display = 'none';
+  }
+
+  // Includes
+  const incContainer = document.getElementById('f-includes');
+  incContainer.innerHTML = state.includes.slice(0,6).map(i =>
+    `<div class="f-inc-chip">${i}</div>`
+  ).join('');
+
+  // Contact
+  const tel = document.getElementById('inp-tel')?.value || '';
+  const email = document.getElementById('inp-email')?.value || '';
+  document.getElementById('f-tel').textContent = tel ? '📱 ' + tel : '';
+  document.getElementById('f-email').textContent = email ? '✉️ ' + email : '';
+
+  // Canvas label
+  document.getElementById('canvas-label').textContent = `Vista previa · ${fmt.name} (${fmt.displayW}×${fmt.displayH})`;
+}
+
+// ============================================================
+// INCLUDES
+// ============================================================
+function addIncluye() {
+  const inp = document.getElementById('inp-inc');
+  const val = inp.value.trim();
+  if (!val) return;
+  if (!state.includes.includes(val)) {
+    state.includes.push(val);
+    renderIncTags();
+    updateFlyer();
+  }
+  inp.value = '';
+  inp.focus();
+}
+
+function addQuickInclude(val) {
+  if (!state.includes.includes(val)) {
+    state.includes.push(val);
+    renderIncTags();
+    updateFlyer();
+  }
+}
+
+function removeInclude(i) {
+  state.includes.splice(i, 1);
+  renderIncTags();
+  updateFlyer();
+}
+
+function renderIncTags() {
+  const c = document.getElementById('inc-tags');
+  c.innerHTML = state.includes.map((inc, i) =>
+    `<div class="inc-tag">${inc}<span class="rm" onclick="removeInclude(${i})">✕</span></div>`
+  ).join('');
+}
+
+// ============================================================
+// COLORS
+// ============================================================
+function updateAccentColor(v) {
+  state.accentColor = v;
+  document.getElementById('swatch-accent').style.background = v;
+  document.getElementById('hex-accent').textContent = v;
+  updateFlyer();
+}
+function updateBadgeColor(v) {
+  state.badgeColor = v;
+  document.getElementById('swatch-badge').style.background = v;
+  document.getElementById('hex-badge').textContent = v;
+  updateFlyer();
+}
+function updateBrandColor1(v) {
+  state.brand1 = v;
+  document.getElementById('swatch-brand1').style.background = v;
+  document.getElementById('hex-brand1').textContent = v;
+}
+function updateBrandColor2(v) {
+  state.brand2 = v;
+  document.getElementById('swatch-brand2').style.background = v;
+  document.getElementById('hex-brand2').textContent = v;
+}
+
+// ============================================================
+// LOGO
+// ============================================================
+function handleLogoUpload(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = ev => {
+    state.logoDataURL = ev.target.result;
+    document.getElementById('logo-preview').src = ev.target.result;
+    document.getElementById('logo-preview').style.display = 'block';
+    document.getElementById('logo-remove').style.display = 'block';
+    document.querySelector('.upload-area .upload-icon').textContent = '✅';
+    document.querySelector('.upload-area .upload-text').textContent = file.name;
+    updateFlyer();
+  };
+  reader.readAsDataURL(file);
+}
+function removeLogo() {
+  state.logoDataURL = null;
+  document.getElementById('logo-preview').style.display = 'none';
+  document.getElementById('logo-remove').style.display = 'none';
+  document.getElementById('logo-input').value = '';
+  document.querySelector('.upload-area .upload-icon').textContent = '🖼️';
+  document.querySelector('.upload-area .upload-text').innerHTML = 'Arrastrá o hacé clic para subir<br><small>PNG, JPG, SVG · máx. 2MB</small>';
+  updateFlyer();
+}
+
+// ============================================================
+// TABS
+// ============================================================
+function switchTab(tab) {
+  document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.ptab').forEach(t => t.classList.remove('active'));
+  document.getElementById('tab-' + tab).classList.add('active');
+  event.target.classList.add('active');
+}
+function switchRightTab(tab) {
+  document.querySelectorAll('.right-tab-content').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.panel-right .ptab').forEach(t => t.classList.remove('active'));
+  document.getElementById('rtab-' + tab).classList.add('active');
+  event.target.classList.add('active');
+}
+
+// ============================================================
+// FILE FORMAT / EXPORT
+// ============================================================
+function setFileFormat(fmt, el) {
+  state.fileFormat = fmt;
+  document.querySelectorAll('.panel-right .chips .chip').forEach(c => c.classList.remove('active'));
+  el.classList.add('active');
+}
+
+function showExportPanel() {
+  // Mobile: scroll to right panel
+  const rp = document.getElementById('right-panel');
+  if (rp.style.display === 'none') rp.style.display = 'flex';
+}
+
+async function exportCurrent() {
+  const fmt = formats.find(f => f.id === state.format);
+  await doExport(fmt);
+}
+
+async function exportFormat(fmtId) {
+  const fmt = formats.find(f => f.id === fmtId);
+  const prevFmt = state.format;
+  state.format = fmtId;
+  updateFlyer();
+  await new Promise(r => setTimeout(r, 120));
+  await doExport(fmt);
+  state.format = prevFmt;
+  updateFlyer();
+}
+
+async function doExport(fmt) {
+  const overlay = document.getElementById('export-overlay');
+  overlay.classList.add('show');
+
+  const scale = parseFloat(document.getElementById('exp-scale').value) || 2;
+  const canvas = document.getElementById('flyer-canvas');
+
+  try {
+    const c = await html2canvas(canvas, {
+      scale: scale * (fmt.displayW / fmt.w),
+      useCORS: true,
+      allowTaint: true,
+      backgroundColor: null,
+      logging: false,
+    });
+
+    const mimeType = state.fileFormat === 'jpeg' ? 'image/jpeg' : 'image/png';
+    const quality = state.fileFormat === 'jpeg' ? 0.92 : 1;
+    const dataURL = c.toDataURL(mimeType, quality);
+
+    const destino = document.getElementById('inp-destino')?.value?.replace(/\s+/g,'-').toLowerCase() || 'flyer';
+    const link = document.createElement('a');
+    link.download = `flyturismo-${destino}-${fmt.id}.${state.fileFormat}`;
+    link.href = dataURL;
+    link.click();
+
+    showToast('✅ ¡Flyer descargado exitosamente!');
+  } catch(err) {
+    console.error(err);
+    showToast('❌ Error al exportar. Intentá de nuevo.');
+  } finally {
+    overlay.classList.remove('show');
+  }
+}
+
+// ============================================================
+// SAVE / LOAD BRAND
+// ============================================================
+function saveBrand() {
+  const brand = {
+    agencia: document.getElementById('inp-agencia')?.value,
+    slogan: document.getElementById('inp-slogan')?.value,
+    tel: document.getElementById('inp-tel')?.value,
+    email: document.getElementById('inp-email')?.value,
+    accentColor: state.accentColor,
+    badgeColor: state.badgeColor,
+    brand1: state.brand1,
+    brand2: state.brand2,
+    logoDataURL: state.logoDataURL,
+  };
+  localStorage.setItem('flyturismo-brand', JSON.stringify(brand));
+  showToast('💾 Marca guardada correctamente');
+}
+
+function loadBrand() {
+  try {
+    const saved = localStorage.getItem('flyturismo-brand');
+    if (!saved) return;
+    const brand = JSON.parse(saved);
+
+    if (brand.agencia) document.getElementById('inp-agencia').value = brand.agencia;
+    if (brand.slogan) document.getElementById('inp-slogan').value = brand.slogan;
+    if (brand.tel) document.getElementById('inp-tel').value = brand.tel;
+    if (brand.email) document.getElementById('inp-email').value = brand.email;
+
+    if (brand.accentColor) {
+      state.accentColor = brand.accentColor;
+      document.getElementById('cp-accent').value = brand.accentColor;
+      document.getElementById('swatch-accent').style.background = brand.accentColor;
+      document.getElementById('hex-accent').textContent = brand.accentColor;
+    }
+    if (brand.badgeColor) {
+      state.badgeColor = brand.badgeColor;
+      document.getElementById('cp-badge').value = brand.badgeColor;
+      document.getElementById('swatch-badge').style.background = brand.badgeColor;
+      document.getElementById('hex-badge').textContent = brand.badgeColor;
+    }
+    if (brand.brand1) {
+      state.brand1 = brand.brand1;
+      document.getElementById('cp-brand1').value = brand.brand1;
+      document.getElementById('swatch-brand1').style.background = brand.brand1;
+      document.getElementById('hex-brand1').textContent = brand.brand1;
+    }
+    if (brand.brand2) {
+      state.brand2 = brand.brand2;
+      document.getElementById('cp-brand2').value = brand.brand2;
+      document.getElementById('swatch-brand2').style.background = brand.brand2;
+      document.getElementById('hex-brand2').textContent = brand.brand2;
+    }
+    if (brand.logoDataURL) {
+      state.logoDataURL = brand.logoDataURL;
+      document.getElementById('logo-preview').src = brand.logoDataURL;
+      document.getElementById('logo-preview').style.display = 'block';
+      document.getElementById('logo-remove').style.display = 'block';
+      document.querySelector('.upload-area .upload-icon').textContent = '✅';
+      document.querySelector('.upload-area .upload-text').textContent = 'Logo cargado';
+    }
+  } catch(e) {}
+}
+
+function resetForm() {
+  if (!confirm('¿Limpiar todos los datos del flyer? (La marca guardada se mantiene)')) return;
+  document.getElementById('inp-destino').value = '';
+  document.getElementById('inp-subtitulo').value = '';
+  document.getElementById('inp-precio').value = '';
+  document.getElementById('inp-pp').value = '';
+  document.getElementById('inp-noches').value = '';
+  document.getElementById('inp-badge').value = '';
+  document.getElementById('inp-tel').value = '';
+  document.getElementById('inp-email').value = '';
+  state.includes = [];
+  renderIncTags();
+  updateFlyer();
+}
+
+// ============================================================
+// TOAST
+// ============================================================
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 3000);
+}
+
+// ============================================================
+// SCALE LABEL
+// ============================================================
+document.getElementById('exp-scale')?.addEventListener('input', function() {
+  const labels = {1:'1× normal',1.5:'1.5×',2:'2× redes',2.5:'2.5×',3:'3× alta'};
+  document.getElementById('scale-label').textContent = labels[this.value] || this.value + '×';
+  state.scale = parseFloat(this.value);
+});
+
+// ============================================================
+// GRADIENT OPACITY
+// ============================================================
+document.getElementById('grad-opacity')?.addEventListener('input', function() {
+  state.gradOpacity = parseInt(this.value);
+  updateFlyer();
+});
+
+// ============================================================
+// KEYBOARD SHORTCUTS
+// ============================================================
+document.addEventListener('keydown', e => {
+  if (e.ctrlKey && e.key === 's') { e.preventDefault(); saveBrand(); }
+  if (e.ctrlKey && e.key === 'e') { e.preventDefault(); exportCurrent(); }
+});
+
+// START
+init();
+</script>
+</body>
+</html>
