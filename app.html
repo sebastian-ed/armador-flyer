@@ -160,11 +160,25 @@ input[type="range"]::-webkit-slider-thumb{-webkit-appearance:none;width:13px;hei
   background-size:24px 24px;pointer-events:none}
 .canvas-label{font-size:.65rem;font-weight:600;color:var(--muted);letter-spacing:.07em;text-transform:uppercase;align-self:flex-start;position:relative;z-index:1}
 .canvas-hint{font-size:.6rem;color:rgba(255,255,255,.22);align-self:flex-start;position:relative;z-index:1}
-.canvas-wrap{position:relative;flex-shrink:0;z-index:1;width:100%;overflow-x:auto;display:flex;justify-content:center}
-.canvas-shadow{border-radius:10px;overflow:hidden;box-shadow:0 20px 80px rgba(0,0,0,.7),0 4px 20px rgba(0,0,0,.4);display:inline-block}
-
-/* flyer-canvas se escala en mobile */
-#flyer-canvas{max-width:100%;height:auto!important;width:auto!important}
+.canvas-wrap{
+  position:relative;
+  z-index:1;
+  width:100%;
+  overflow-x: auto;
+  overflow-y: visible;
+  display: flex;
+  justify-content: center;
+}
+.canvas-shadow{
+  border-radius:10px;
+  overflow:hidden;
+  box-shadow:0 20px 80px rgba(0,0,0,.7),0 4px 20px rgba(0,0,0,.4);
+  display:inline-block;
+}
+#flyer-canvas{
+  flex-shrink:0; /* evita que el canvas se encoja dentro del flex */
+  /* las dimensiones width/height se asignan dinámicamente desde JS */
+}
 
 /* ===================== FLYER ===================== */
 #flyer-canvas{position:relative;overflow:hidden;font-family:'Montserrat',sans-serif}
@@ -252,11 +266,6 @@ input[type="range"]::-webkit-slider-thumb{-webkit-appearance:none;width:13px;hei
   .format-grid{gap:.5rem}
   .fmt-card{padding:.48rem .28rem}
   .f-inner{padding:0 22px 20px}
-  #flyer-canvas{max-width:none;height:auto}
-}
-
-@media (min-width: 1024px) {
-  .panel-left,.panel-right{width:308px}
 }
 </style>
 </head>
