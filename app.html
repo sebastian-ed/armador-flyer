@@ -15,8 +15,8 @@
   --coral:#E8613A;--gold:#C9A84C;--sky:#4EAECF;--success:#3CB97A;
   --sidebar:308px;
 }
-html,body{height:100%;overflow:hidden}
-body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;display:flex;flex-direction:column}
+html,body{height:100%}
+body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;display:flex;flex-direction:column;overflow-x:hidden;overflow-y:auto;-webkit-overflow-scrolling:touch}
 
 /* TOPBAR */
 .topbar{height:52px;background:rgba(15,34,51,0.98);border-bottom:1px solid var(--border);
@@ -33,13 +33,15 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;dis
 .tb-btn.primary{background:var(--coral);color:#fff;font-weight:600}
 .tb-btn.primary:hover{background:#d4512c}
 .tb-btn.sm{padding:.25rem .6rem;font-size:.7rem}
+.mobile-scroll-note{display:block;padding:.55rem .8rem;background:rgba(232,97,58,.08);border-bottom:1px solid rgba(232,97,58,.18);color:rgba(240,237,230,.82);font-size:.72rem;line-height:1.45}
+@media (min-width:768px){.mobile-scroll-note{display:none}}
 
 /* LAYOUT BASE (mobile first) */
-.main{display:flex;flex:1;overflow:hidden;flex-direction:column}
+.main{display:flex;flex:1;overflow:visible;flex-direction:column;min-height:0}
 .panel-left{width:100%;background:var(--panel);border-right:none;border-bottom:1px solid var(--border);
-  display:flex;flex-direction:column;overflow-y:auto;flex-shrink:0;order:2}
+  display:flex;flex-direction:column;overflow:visible;flex-shrink:0;order:2}
 .panel-right{width:100%;background:var(--panel);border-left:none;border-top:1px solid var(--border);
-  display:flex;flex-direction:column;overflow-y:auto;flex-shrink:0;order:3}
+  display:flex;flex-direction:column;overflow:visible;flex-shrink:0;order:3}
 .canvas-area{order:1;width:100%}
 
 /* TABS */
@@ -154,38 +156,20 @@ input[type="range"]::-webkit-slider-thumb{-webkit-appearance:none;width:13px;hei
 
 /* ===================== CANVAS ===================== */
 .canvas-area{background:#080F18;display:flex;flex-direction:column;
-  align-items:center;justify-content:flex-start;overflow:auto;padding:0.8rem;gap:.5rem;position:relative}
+  align-items:center;justify-content:flex-start;overflow:visible;padding:0.8rem;gap:.5rem;position:relative}
 .canvas-area::before{content:'';position:absolute;inset:0;
   background-image:radial-gradient(rgba(255,255,255,.03) 1px,transparent 1px);
   background-size:24px 24px;pointer-events:none}
 .canvas-label{font-size:.65rem;font-weight:600;color:var(--muted);letter-spacing:.07em;text-transform:uppercase;align-self:flex-start;position:relative;z-index:1}
 .canvas-hint{font-size:.6rem;color:rgba(255,255,255,.22);align-self:flex-start;position:relative;z-index:1}
-.preview-toolbar{display:flex;flex-wrap:wrap;gap:.42rem;align-self:stretch;position:relative;z-index:1}
-.preview-group{display:flex;align-items:center;gap:.35rem;flex-wrap:wrap}
-.preview-chip{padding:.38rem .68rem;border-radius:999px;border:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.05);color:var(--text);font-size:.68rem;font-weight:600;cursor:pointer;transition:all .2s;font-family:'DM Sans',sans-serif}
-.preview-chip:hover{background:rgba(255,255,255,.1)}
-.preview-chip.active{background:var(--coral);border-color:var(--coral);color:#fff}
-.preview-toolbar-label{font-size:.62rem;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;margin-right:.2rem}
 .canvas-wrap{
   position:relative;
   z-index:1;
   width:100%;
-  overflow:auto;
-  display:flex;
-  justify-content:center;
-  padding:0 0 .4rem;
-}
-.preview-stage{
-  position:relative;
-  display:inline-flex;
-  justify-content:center;
-  align-items:flex-start;
-  width:100%;
-  min-width:min-content;
-}
-.preview-scaler{
-  transform-origin:top center;
-  will-change:transform;
+  overflow-x: auto;
+  overflow-y: visible;
+  display: flex;
+  justify-content: center;
 }
 .canvas-shadow{
   border-radius:10px;
@@ -194,7 +178,8 @@ input[type="range"]::-webkit-slider-thumb{-webkit-appearance:none;width:13px;hei
   display:inline-block;
 }
 #flyer-canvas{
-  flex-shrink:0;
+  flex-shrink:0; /* evita que el canvas se encoja dentro del flex */
+  /* las dimensiones width/height se asignan dinámicamente desde JS */
 }
 
 /* ===================== FLYER ===================== */
@@ -269,20 +254,13 @@ input[type="range"]::-webkit-slider-thumb{-webkit-appearance:none;width:13px;hei
 .toast.show{transform:translateX(-50%) translateY(0)}
 
 /* ===== MEJORAS PARA TABLET / ESCRITORIO ===== */
-@media (max-width: 767px) {
-  .canvas-area{min-height:56vh;padding:1rem .8rem 1.2rem}
-  .canvas-wrap{justify-content:flex-start}
-  .preview-stage{justify-content:flex-start}
-  .preview-toolbar{gap:.36rem}
-  .preview-group{width:100%}
-  .preview-chip{font-size:.66rem;padding:.34rem .58rem}
-}
-
 @media (min-width: 768px) {
-  .main{flex-direction:row}
-  .panel-left{width:var(--sidebar);border-right:1px solid var(--border);border-bottom:none;order:0}
-  .panel-right{width:var(--sidebar);border-left:1px solid var(--border);border-top:none;order:0}
-  .canvas-area{flex:1;order:0}
+  html,body{overflow:hidden}
+  body{overflow:hidden}
+  .main{flex-direction:row;overflow:hidden}
+  .panel-left{width:var(--sidebar);border-right:1px solid var(--border);border-bottom:none;order:0;overflow-y:auto}
+  .panel-right{width:var(--sidebar);border-left:1px solid var(--border);border-top:none;order:0;overflow-y:auto}
+  .canvas-area{flex:1;order:0;overflow:auto}
   .topbar{padding:0 1.2rem}
   .topbar-title{display:inline-block}
   .topbar-sep{display:block}
@@ -307,6 +285,7 @@ input[type="range"]::-webkit-slider-thumb{-webkit-appearance:none;width:13px;hei
     <button class="tb-btn primary sm" onclick="exportCurrent()">⬇ Exportar</button>
   </div>
 </div>
+<div class="mobile-scroll-note">En celular, deslizá hacia abajo para completar todo el formulario. La vista previa queda arriba y los paneles siguen debajo.</div>
 
 <div class="main">
 
@@ -694,26 +673,10 @@ input[type="range"]::-webkit-slider-thumb{-webkit-appearance:none;width:13px;hei
 <!-- ===== CANVAS ===== -->
 <div class="canvas-area" id="canvas-area">
   <div class="canvas-label" id="canvas-label">Vista previa · Instagram Feed (1080×1080)</div>
-  <div class="canvas-hint" id="canvas-hint">💡 Arrastrá el logo, badge y bloque de texto libremente · Manejador ⤡ para redimensionar logo</div>
-  <div class="preview-toolbar">
-    <div class="preview-group" id="preview-mode-group">
-      <span class="preview-toolbar-label">Vista</span>
-      <button class="preview-chip active" type="button" onclick="setPreviewMode('auto', this)">Auto</button>
-      <button class="preview-chip" type="button" onclick="setPreviewMode('mobile', this)">Celular</button>
-      <button class="preview-chip" type="button" onclick="setPreviewMode('tablet', this)">Tablet</button>
-      <button class="preview-chip" type="button" onclick="setPreviewMode('desktop', this)">Desktop</button>
-    </div>
-    <div class="preview-group" id="preview-fit-group">
-      <span class="preview-toolbar-label">Escala</span>
-      <button class="preview-chip active" type="button" onclick="setPreviewFit('fit', this)">Ajustar</button>
-      <button class="preview-chip" type="button" onclick="setPreviewFit('real', this)">100%</button>
-    </div>
-  </div>
-  <div class="canvas-wrap" id="canvas-wrap">
-    <div class="preview-stage" id="preview-stage">
-      <div class="preview-scaler" id="preview-scaler">
-        <div class="canvas-shadow">
-          <div id="flyer-canvas">
+  <div class="canvas-hint">💡 Arrastrá el logo, badge y bloque de texto libremente · Manejador ⤡ para redimensionar logo</div>
+  <div class="canvas-wrap">
+    <div class="canvas-shadow">
+      <div id="flyer-canvas">
         <!-- BACKGROUND LAYERS -->
         <div class="flyer-bg-color" id="flyer-bg-color"></div>
         <div class="flyer-bg-photo" id="flyer-bg-photo" style="display:none"></div>
@@ -763,8 +726,6 @@ input[type="range"]::-webkit-slider-thumb{-webkit-appearance:none;width:13px;hei
                 <div class="f-contact-line" id="f-ig"></div>
               </div>
             </div>
-          </div>
-        </div>
           </div>
         </div>
       </div>
@@ -837,8 +798,6 @@ input[type="range"]::-webkit-slider-thumb{-webkit-appearance:none;width:13px;hei
         ✅ Logo PNG sin fondo queda mejor<br>
         ✅ Guardá tu marca (Ctrl+S)<br>
         ✅ Ctrl+E para exportar rápido
-          </div>
-        </div>
       </div>
     </div>
   </div>
@@ -864,7 +823,6 @@ const S = {
   logoDataURL:null, bgDataURL:null,
   logoSize:90, includes:[],
   gradOverride:null,
-  previewMode:'auto', previewFit:'fit',
 };
 
 // ============================================================
@@ -1012,52 +970,7 @@ function init() {
     document.getElementById('scale-label').textContent = L[this.value]||this.value+'×';
   });
 
-  window.addEventListener('resize', applyPreviewScale);
   updateFlyer();
-}
-
-function setPreviewMode(mode, btn){
-  S.previewMode = mode;
-  document.querySelectorAll('#preview-mode-group .preview-chip').forEach(c=>c.classList.remove('active'));
-  if(btn) btn.classList.add('active');
-  applyPreviewScale();
-}
-
-function setPreviewFit(mode, btn){
-  S.previewFit = mode;
-  document.querySelectorAll('#preview-fit-group .preview-chip').forEach(c=>c.classList.remove('active'));
-  if(btn) btn.classList.add('active');
-  applyPreviewScale();
-}
-
-function getPreviewViewportWidth(){
-  const wrap = g('canvas-wrap');
-  if(!wrap) return window.innerWidth;
-  const base = wrap.clientWidth || window.innerWidth;
-  if(S.previewMode === 'mobile') return 390;
-  if(S.previewMode === 'tablet') return 820;
-  if(S.previewMode === 'desktop') return 1440;
-  return base;
-}
-
-function applyPreviewScale(){
-  const wrap = g('canvas-wrap');
-  const scaler = g('preview-scaler');
-  const canvas = g('flyer-canvas');
-  const hint = g('canvas-hint');
-  if(!wrap || !scaler || !canvas) return;
-
-  const canvasWidth = canvas.offsetWidth || 1;
-  const viewportWidth = getPreviewViewportWidth();
-  const available = Math.max(240, Math.min(wrap.clientWidth || viewportWidth, viewportWidth) - 6);
-  const scale = S.previewFit === 'fit' ? Math.min(1, available / canvasWidth) : 1;
-
-  scaler.style.transform = `scale(${scale})`;
-  scaler.style.width = canvasWidth + 'px';
-  scaler.style.height = (canvas.offsetHeight * scale) + 'px';
-
-  const modeLabel = S.previewMode === 'auto' ? 'auto' : S.previewMode;
-  hint.textContent = `Vista ${modeLabel}${S.previewFit === 'fit' ? ' · ajustada al ancho disponible' : ' · escala real 100%'} · Arrastrá logo, badge y texto libremente.`;
 }
 
 // ============================================================
@@ -1130,52 +1043,7 @@ function onGradChange() {
     document.getElementById('hex-'+k).textContent=c;
   });
   S.gradOverride = {c1,c2,c3,dir};
-  window.addEventListener('resize', applyPreviewScale);
   updateFlyer();
-}
-
-function setPreviewMode(mode, btn){
-  S.previewMode = mode;
-  document.querySelectorAll('#preview-mode-group .preview-chip').forEach(c=>c.classList.remove('active'));
-  if(btn) btn.classList.add('active');
-  applyPreviewScale();
-}
-
-function setPreviewFit(mode, btn){
-  S.previewFit = mode;
-  document.querySelectorAll('#preview-fit-group .preview-chip').forEach(c=>c.classList.remove('active'));
-  if(btn) btn.classList.add('active');
-  applyPreviewScale();
-}
-
-function getPreviewViewportWidth(){
-  const wrap = g('canvas-wrap');
-  if(!wrap) return window.innerWidth;
-  const base = wrap.clientWidth || window.innerWidth;
-  if(S.previewMode === 'mobile') return 390;
-  if(S.previewMode === 'tablet') return 820;
-  if(S.previewMode === 'desktop') return 1440;
-  return base;
-}
-
-function applyPreviewScale(){
-  const wrap = g('canvas-wrap');
-  const scaler = g('preview-scaler');
-  const canvas = g('flyer-canvas');
-  const hint = g('canvas-hint');
-  if(!wrap || !scaler || !canvas) return;
-
-  const canvasWidth = canvas.offsetWidth || 1;
-  const viewportWidth = getPreviewViewportWidth();
-  const available = Math.max(240, Math.min(wrap.clientWidth || viewportWidth, viewportWidth) - 6);
-  const scale = S.previewFit === 'fit' ? Math.min(1, available / canvasWidth) : 1;
-
-  scaler.style.transform = `scale(${scale})`;
-  scaler.style.width = canvasWidth + 'px';
-  scaler.style.height = (canvas.offsetHeight * scale) + 'px';
-
-  const modeLabel = S.previewMode === 'auto' ? 'auto' : S.previewMode;
-  hint.textContent = `Vista ${modeLabel}${S.previewFit === 'fit' ? ' · ajustada al ancho disponible' : ' · escala real 100%'} · Arrastrá logo, badge y texto libremente.`;
 }
 
 function resetGradColors() {
@@ -1188,52 +1056,7 @@ function resetGradColors() {
     document.getElementById('hex-'+k).textContent=c;
   });
   document.getElementById('grad-dir').value=t.dd||'135deg';
-  window.addEventListener('resize', applyPreviewScale);
   updateFlyer();
-}
-
-function setPreviewMode(mode, btn){
-  S.previewMode = mode;
-  document.querySelectorAll('#preview-mode-group .preview-chip').forEach(c=>c.classList.remove('active'));
-  if(btn) btn.classList.add('active');
-  applyPreviewScale();
-}
-
-function setPreviewFit(mode, btn){
-  S.previewFit = mode;
-  document.querySelectorAll('#preview-fit-group .preview-chip').forEach(c=>c.classList.remove('active'));
-  if(btn) btn.classList.add('active');
-  applyPreviewScale();
-}
-
-function getPreviewViewportWidth(){
-  const wrap = g('canvas-wrap');
-  if(!wrap) return window.innerWidth;
-  const base = wrap.clientWidth || window.innerWidth;
-  if(S.previewMode === 'mobile') return 390;
-  if(S.previewMode === 'tablet') return 820;
-  if(S.previewMode === 'desktop') return 1440;
-  return base;
-}
-
-function applyPreviewScale(){
-  const wrap = g('canvas-wrap');
-  const scaler = g('preview-scaler');
-  const canvas = g('flyer-canvas');
-  const hint = g('canvas-hint');
-  if(!wrap || !scaler || !canvas) return;
-
-  const canvasWidth = canvas.offsetWidth || 1;
-  const viewportWidth = getPreviewViewportWidth();
-  const available = Math.max(240, Math.min(wrap.clientWidth || viewportWidth, viewportWidth) - 6);
-  const scale = S.previewFit === 'fit' ? Math.min(1, available / canvasWidth) : 1;
-
-  scaler.style.transform = `scale(${scale})`;
-  scaler.style.width = canvasWidth + 'px';
-  scaler.style.height = (canvas.offsetHeight * scale) + 'px';
-
-  const modeLabel = S.previewMode === 'auto' ? 'auto' : S.previewMode;
-  hint.textContent = `Vista ${modeLabel}${S.previewFit === 'fit' ? ' · ajustada al ancho disponible' : ' · escala real 100%'} · Arrastrá logo, badge y texto libremente.`;
 }
 
 function setAccent(v){S.accentColor=v;document.getElementById('sw-accent').style.background=v;document.getElementById('hex-accent').textContent=v;updateFlyer();}
@@ -1279,52 +1102,7 @@ function removeBg(){
   document.getElementById('bg-input').value='';
   document.getElementById('bg-upload-icon').textContent='🖼️';
   document.getElementById('bg-upload-text').innerHTML='Subí tu propia foto de fondo<br><small>JPG, PNG, WEBP · máx. 8MB</small>';
-  window.addEventListener('resize', applyPreviewScale);
   updateFlyer();
-}
-
-function setPreviewMode(mode, btn){
-  S.previewMode = mode;
-  document.querySelectorAll('#preview-mode-group .preview-chip').forEach(c=>c.classList.remove('active'));
-  if(btn) btn.classList.add('active');
-  applyPreviewScale();
-}
-
-function setPreviewFit(mode, btn){
-  S.previewFit = mode;
-  document.querySelectorAll('#preview-fit-group .preview-chip').forEach(c=>c.classList.remove('active'));
-  if(btn) btn.classList.add('active');
-  applyPreviewScale();
-}
-
-function getPreviewViewportWidth(){
-  const wrap = g('canvas-wrap');
-  if(!wrap) return window.innerWidth;
-  const base = wrap.clientWidth || window.innerWidth;
-  if(S.previewMode === 'mobile') return 390;
-  if(S.previewMode === 'tablet') return 820;
-  if(S.previewMode === 'desktop') return 1440;
-  return base;
-}
-
-function applyPreviewScale(){
-  const wrap = g('canvas-wrap');
-  const scaler = g('preview-scaler');
-  const canvas = g('flyer-canvas');
-  const hint = g('canvas-hint');
-  if(!wrap || !scaler || !canvas) return;
-
-  const canvasWidth = canvas.offsetWidth || 1;
-  const viewportWidth = getPreviewViewportWidth();
-  const available = Math.max(240, Math.min(wrap.clientWidth || viewportWidth, viewportWidth) - 6);
-  const scale = S.previewFit === 'fit' ? Math.min(1, available / canvasWidth) : 1;
-
-  scaler.style.transform = `scale(${scale})`;
-  scaler.style.width = canvasWidth + 'px';
-  scaler.style.height = (canvas.offsetHeight * scale) + 'px';
-
-  const modeLabel = S.previewMode === 'auto' ? 'auto' : S.previewMode;
-  hint.textContent = `Vista ${modeLabel}${S.previewFit === 'fit' ? ' · ajustada al ancho disponible' : ' · escala real 100%'} · Arrastrá logo, badge y texto libremente.`;
 }
 
 function handleLogoUpload(e) {
@@ -1348,52 +1126,7 @@ function removeLogo(){
   document.getElementById('logo-input').value='';
   document.getElementById('logo-upload-icon').textContent='🖼️';
   document.getElementById('logo-upload-text').innerHTML='Subí tu logo<br><small>PNG transparente recomendado</small>';
-  window.addEventListener('resize', applyPreviewScale);
   updateFlyer();
-}
-
-function setPreviewMode(mode, btn){
-  S.previewMode = mode;
-  document.querySelectorAll('#preview-mode-group .preview-chip').forEach(c=>c.classList.remove('active'));
-  if(btn) btn.classList.add('active');
-  applyPreviewScale();
-}
-
-function setPreviewFit(mode, btn){
-  S.previewFit = mode;
-  document.querySelectorAll('#preview-fit-group .preview-chip').forEach(c=>c.classList.remove('active'));
-  if(btn) btn.classList.add('active');
-  applyPreviewScale();
-}
-
-function getPreviewViewportWidth(){
-  const wrap = g('canvas-wrap');
-  if(!wrap) return window.innerWidth;
-  const base = wrap.clientWidth || window.innerWidth;
-  if(S.previewMode === 'mobile') return 390;
-  if(S.previewMode === 'tablet') return 820;
-  if(S.previewMode === 'desktop') return 1440;
-  return base;
-}
-
-function applyPreviewScale(){
-  const wrap = g('canvas-wrap');
-  const scaler = g('preview-scaler');
-  const canvas = g('flyer-canvas');
-  const hint = g('canvas-hint');
-  if(!wrap || !scaler || !canvas) return;
-
-  const canvasWidth = canvas.offsetWidth || 1;
-  const viewportWidth = getPreviewViewportWidth();
-  const available = Math.max(240, Math.min(wrap.clientWidth || viewportWidth, viewportWidth) - 6);
-  const scale = S.previewFit === 'fit' ? Math.min(1, available / canvasWidth) : 1;
-
-  scaler.style.transform = `scale(${scale})`;
-  scaler.style.width = canvasWidth + 'px';
-  scaler.style.height = (canvas.offsetHeight * scale) + 'px';
-
-  const modeLabel = S.previewMode === 'auto' ? 'auto' : S.previewMode;
-  hint.textContent = `Vista ${modeLabel}${S.previewFit === 'fit' ? ' · ajustada al ancho disponible' : ' · escala real 100%'} · Arrastrá logo, badge y texto libremente.`;
 }
 
 // ============================================================
@@ -1596,8 +1329,6 @@ function updateFlyer() {
   g('f-tel').textContent  = tel   ? '📱 '+tel   : '';
   g('f-email').textContent= email ? '✉️ '+email : '';
   g('f-ig').textContent   = ig    ? ig            : '';
-
-  applyPreviewScale();
 }
 
 // ============================================================
