@@ -156,7 +156,7 @@ input[type="range"]::-webkit-slider-thumb{-webkit-appearance:none;width:13px;hei
 
 /* ===================== CANVAS ===================== */
 .canvas-area{background:#080F18;display:flex;flex-direction:column;
-  align-items:center;justify-content:flex-start;overflow:visible;padding:0.8rem;gap:.5rem;position:relative}
+  align-items:flex-start;justify-content:flex-start;overflow:auto;padding:0.8rem;gap:.5rem;position:relative;-webkit-overflow-scrolling:touch}
 .canvas-area::before{content:'';position:absolute;inset:0;
   background-image:radial-gradient(rgba(255,255,255,.03) 1px,transparent 1px);
   background-size:24px 24px;pointer-events:none}
@@ -166,16 +166,19 @@ input[type="range"]::-webkit-slider-thumb{-webkit-appearance:none;width:13px;hei
   position:relative;
   z-index:1;
   width:100%;
-  overflow-x: auto;
-  overflow-y: visible;
-  display: flex;
-  justify-content: center;
+  min-height:max-content;
+  overflow:auto;
+  display:flex;
+  justify-content:flex-start;
+  align-items:flex-start;
 }
 .canvas-shadow{
   border-radius:10px;
   overflow:hidden;
   box-shadow:0 20px 80px rgba(0,0,0,.7),0 4px 20px rgba(0,0,0,.4);
-  display:inline-block;
+  display:block;
+  width:max-content;
+  max-width:none;
 }
 #flyer-canvas{
   flex-shrink:0; /* evita que el canvas se encoja dentro del flex */
@@ -254,6 +257,11 @@ input[type="range"]::-webkit-slider-thumb{-webkit-appearance:none;width:13px;hei
 .toast.show{transform:translateX(-50%) translateY(0)}
 
 /* ===== MEJORAS PARA TABLET / ESCRITORIO ===== */
+@media (max-width: 767px) {
+  .canvas-area{scrollbar-width:thin}
+  .canvas-wrap{padding-bottom:.35rem}
+}
+
 @media (min-width: 768px) {
   html,body{overflow:hidden}
   body{overflow:hidden}
@@ -873,12 +881,17 @@ const QUICK_INC = [
 // ============================================================
 // DRAG & RESIZE
 // ============================================================
+function isMobilePreviewMode() {
+  return window.matchMedia('(max-width: 767px)').matches;
+}
+
 function makeDraggable(el) {
   const canvas = document.getElementById('flyer-canvas');
   el.addEventListener('mousedown', start);
   el.addEventListener('touchstart', start, {passive:false});
 
   function start(e) {
+    if (e.type === 'touchstart' && isMobilePreviewMode()) return;
     if (e.target.classList.contains('resize-h')) return;
     e.stopPropagation();
     document.querySelectorAll('.f-draggable').forEach(d=>d.classList.remove('sel'));
@@ -890,6 +903,7 @@ function makeDraggable(el) {
     const sx = t.clientX, sy = t.clientY;
 
     const move = ev => {
+      if (ev.type === 'touchmove' && isMobilePreviewMode()) return;
       ev.preventDefault && ev.preventDefault();
       const mt = ev.touches?ev.touches[0]:ev;
       let nl = ox + (mt.clientX - sx);
@@ -916,10 +930,12 @@ function makeResizable(el, handle, cb) {
   handle.addEventListener('mousedown', start);
   handle.addEventListener('touchstart', start, {passive:false});
   function start(e) {
+    if (e.type === 'touchstart' && isMobilePreviewMode()) return;
     e.stopPropagation(); e.preventDefault();
     const t = e.touches?e.touches[0]:e;
     const ow = el.offsetWidth, sx = t.clientX;
     const move = ev => {
+      if (ev.type === 'touchmove' && isMobilePreviewMode()) return;
       ev.preventDefault && ev.preventDefault();
       const mt = ev.touches?ev.touches[0]:ev;
       cb(Math.max(35, ow + (mt.clientX - sx)));
