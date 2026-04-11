@@ -37,12 +37,12 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;dis
 @media (min-width:768px){.mobile-scroll-note{display:none}}
 
 /* LAYOUT BASE (mobile first) */
-.main{display:flex;flex:1;overflow:visible;flex-direction:column;min-height:0}
+.main{display:flex;flex:1 1 auto;min-height:0;height:calc(100dvh - 52px);overflow:hidden;flex-direction:column}
 .panel-left{width:100%;background:var(--panel);border-right:none;border-bottom:1px solid var(--border);
-  display:flex;flex-direction:column;overflow:visible;flex-shrink:0;order:2}
+  display:flex;flex-direction:column;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;flex:1 1 auto;min-height:0;order:2}
 .panel-right{width:100%;background:var(--panel);border-left:none;border-top:1px solid var(--border);
-  display:flex;flex-direction:column;overflow:visible;flex-shrink:0;order:3}
-.canvas-area{order:1;width:100%}
+  display:flex;flex-direction:column;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;flex:0 0 auto;max-height:32dvh;min-height:0;order:3}
+.canvas-area{order:1;width:100%;flex:0 0 auto;max-height:34dvh;overflow:auto;-webkit-overflow-scrolling:touch}
 
 /* TABS */
 .panel-tabs{display:flex;border-bottom:1px solid var(--border);flex-shrink:0}
@@ -257,10 +257,10 @@ input[type="range"]::-webkit-slider-thumb{-webkit-appearance:none;width:13px;hei
 @media (min-width: 768px) {
   html,body{overflow:hidden}
   body{overflow:hidden}
-  .main{flex-direction:row;overflow:hidden}
-  .panel-left{width:var(--sidebar);border-right:1px solid var(--border);border-bottom:none;order:0;overflow-y:auto}
-  .panel-right{width:var(--sidebar);border-left:1px solid var(--border);border-top:none;order:0;overflow-y:auto}
-  .canvas-area{flex:1;order:0;overflow:auto}
+  .main{flex-direction:row;overflow:hidden;height:calc(100vh - 52px)}
+  .panel-left{width:var(--sidebar);border-right:1px solid var(--border);border-bottom:none;order:0;overflow-y:auto;flex:0 0 var(--sidebar)}
+  .panel-right{width:var(--sidebar);border-left:1px solid var(--border);border-top:none;order:0;overflow-y:auto;max-height:none;flex:0 0 var(--sidebar)}
+  .canvas-area{flex:1;order:0;overflow:auto;max-height:none}
   .topbar{padding:0 1.2rem}
   .topbar-title{display:inline-block}
   .topbar-sep{display:block}
